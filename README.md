@@ -17,7 +17,7 @@ uv pip install "rmvpe-lite[torch] @ git+https://github.com/thewh1teagle/rmvpe-on
 
 Download the ONNX model from the [model-files-v1.0 release](https://github.com/thewh1teagle/rmvpe-onnx/releases/download/model-files-v1.0/rmvpe.onnx).
 
-See `examples/basic_onnx.py` and `examples/basic_torch.py` for usage examples.
+See the `examples/` folder for usage examples.
 
 `extract()` returns a NumPy array of pitch values in Hz. Unvoiced frames are `0.0`.
 
