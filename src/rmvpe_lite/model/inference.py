@@ -53,6 +53,11 @@ class RMVPE:
                     sample_rate, 16000, lowpass_filter_width=128
                 ).to(self.device)
             audio_res = self.resample_kernel[key_str](audio)
+        if audio_res.shape[-1] <= WINDOW_LENGTH:
+            raise ValueError(
+                "audio is too short after resampling; "
+                f"expected more than {WINDOW_LENGTH} samples, got {audio_res.shape[-1]}"
+            )
         mel_extractor = self.mel_extractor
         mel = mel_extractor(audio_res, center=True)
         hidden = self.mel2hidden(mel)

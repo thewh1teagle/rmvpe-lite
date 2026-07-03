@@ -148,6 +148,11 @@ class RMVPEOnnx:
         cfg = self.config
         if audio.size == 0:
             raise ValueError("audio must contain at least one sample")
+        if audio.size <= cfg.window_length:
+            raise ValueError(
+                "audio is too short after resampling; "
+                f"expected more than {cfg.window_length} samples, got {audio.size}"
+            )
 
         magnitude = np.abs(
             librosa.stft(
