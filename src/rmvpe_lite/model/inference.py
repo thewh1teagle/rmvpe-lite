@@ -15,7 +15,7 @@ class RMVPE:
         self.resample_kernel = {}
         model = E2E0(4, 1, (2, 2))
         checkpoint = {}
-        with safe_open(model_path, framework="pt", device=0) as f:
+        with safe_open(model_path, framework="pt", device=str(device)) as f:
             for k in f.keys():
                 checkpoint[k] = f.get_tensor(k)
         model.load_state_dict(checkpoint)
@@ -29,9 +29,7 @@ class RMVPE:
     def mel2hidden(self, mel):
         with torch.no_grad():
             n_frames = mel.shape[-1]
-            mel = F.pad(
-                mel, (0, 32 * ((n_frames - 1) // 32 + 1) - n_frames), mode="reflect"
-            )
+            mel = _pad_mel_to_multiple(mel, multiple=32)
             hidden = self.model(mel)
             return hidden[:, :n_frames]
 
@@ -60,3 +58,13 @@ class RMVPE:
         hidden = self.mel2hidden(mel)
         f0 = self.decode(hidden, thred=thred, use_viterbi=use_viterbi)
         return f0
+
+
+def _pad_mel_to_multiple(mel, *, multiple):
+    frame_count = mel.shape[-1]
+    padded_count = multiple * ((frame_count - 1) // multiple + 1)
+    pad_count = padded_count - frame_count
+    if pad_count == 0:
+        return mel
+    mode = "reflect" if pad_count < frame_count else "replicate"
+    return F.pad(mel, (0, pad_count), mode=mode)

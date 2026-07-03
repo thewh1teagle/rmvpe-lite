@@ -86,7 +86,11 @@ def export_onnx(
     device = torch.device(device_name)
     weights_path = resolve_weights(weights)
     model = load_model(weights_path, device)
-    dummy_mel = torch.randn(1, N_MELS, frames, device=device)
+    dummy_mel = torch.randn(2, N_MELS, frames, device=device)
+    dynamic_axes = {
+        "mel": {0: "batch", 2: "frames"},
+        "hidden": {0: "batch", 1: "frames"},
+    }
 
     output.parent.mkdir(parents=True, exist_ok=True)
     torch.onnx.export(
@@ -95,10 +99,7 @@ def export_onnx(
         output,
         input_names=["mel"],
         output_names=["hidden"],
-        dynamic_axes={
-            "mel": {2: "frames"},
-            "hidden": {1: "frames"},
-        },
+        dynamic_axes=dynamic_axes,
         opset_version=opset,
         do_constant_folding=True,
         dynamo=False,
