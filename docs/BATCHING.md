@@ -141,5 +141,7 @@ batched path is recommended.
   resampling; a shorter clip raises a `ValueError`. This is a limitation of the
   mel front end and applies to `extract` as well as `extract_batch`; it is not
   specific to batching. Real TTS utterances are always well above this length.
+  In `extract_batch`, one short clip raises for the whole call, so filter out
+  clips shorter than this before batching (about 64 ms at 16 kHz).
 - `sample_rate` given as a sequence must have the same length as `audios`,
   otherwise a `ValueError` is raised.

@@ -60,6 +60,11 @@ class RMVPEOnnx:
         threshold: float = 0.03,
         use_viterbi: bool = False,
     ) -> np.ndarray:
+        """Extract F0 for a single clip.
+
+        Raises ValueError if the clip has window_length or fewer samples after
+        resampling (about 64 ms at 16 kHz); it is too short to compute an STFT.
+        """
         audio = _mono_float32(audio)
         if sample_rate != self.config.sample_rate:
             audio = _resample_audio(audio, sample_rate, self.config.sample_rate)
@@ -92,6 +97,10 @@ class RMVPEOnnx:
         Clips are bucketed by exact padded mel length to avoid contaminating
         real frames with arbitrary right padding. Set deterministic=True to
         force one-by-one extraction for bit-exact single-item behavior.
+
+        Raises ValueError if any clip has window_length or fewer samples after
+        resampling (about 64 ms at 16 kHz); this fails the whole call, so filter
+        out short clips before batching.
         """
         sample_rates = _normalize_sample_rates(sample_rate, len(audios))
         if deterministic or batch_size <= 1:
