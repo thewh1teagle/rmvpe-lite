@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import librosa
@@ -31,6 +31,7 @@ class RMVPEOnnx:
         *,
         providers: list[str] | None = None,
         session_options: ort.SessionOptions | None = None,
+        hop_length: int | None = None,
     ) -> None:
         self.session = ort.InferenceSession(
             str(model_path),
@@ -40,6 +41,10 @@ class RMVPEOnnx:
         self.config = _config_from_metadata(
             self.session.get_modelmeta().custom_metadata_map
         )
+        if hop_length is not None:
+            if hop_length <= 0:
+                raise ValueError("hop_length must be positive")
+            self.config = replace(self.config, hop_length=hop_length)
         self.input = self.session.get_inputs()[0]
         self.input_name = self.input.name
         self.output_name = self.session.get_outputs()[0].name
